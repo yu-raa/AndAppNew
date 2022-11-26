@@ -1,0 +1,6 @@
+<resources>
+	<string name="app_name">One-way message</string>
+	<string name="buttonMain">Click here to start messages!</string>
+	<string name="tool">Enter server IP address here</string>
+	<string name="tool2">Enter port number here</string>
+</resources>
