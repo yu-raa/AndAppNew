@@ -1,6 +1,11 @@
 <resources>
-	<string name="app_name">One-way message</string>
+	<string name="app_name">Two-way message</string>
 	<string name="buttonMain">Click here to start messages!</string>
-	<string name="tool">Enter server IP address here</string>
-	<string name="tool2">Enter port number here</string>
+	<string name="tool">Enter server ip address here</string>
+	<string name="choose_ip">Enter server ip address here</string>
+	<string-array name="serv_ips">
+		<item>192.168.85.49</item>
+		<item>192.168.100.9</item>
+		<item>new ip address</item>
+	</string-array>
 </resources>

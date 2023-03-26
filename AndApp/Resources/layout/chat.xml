@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+      <EditText
+        android:inputType="textMultiLine"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/abc_action_bar_content_inset_with_nav"
+        android:layout_marginTop="457.5dp"
+        android:id="@+id/message"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/abc_action_bar_content_inset_with_nav"
+        android:layout_marginTop="420.5dp"
+        android:id="@+id/successOrNot"
+        android:layout_marginBottom="105.5dp"
+        android:visibility="invisible"
+        android:editable="false"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/abc_action_bar_content_inset_with_nav"
+        android:layout_marginTop="377.5dp"
+        android:layout_marginBottom="145.5dp"
+        android:id="@+id/incoming"
+        android:editable="false"
+        android:layout_marginRight="193.5dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/abc_action_bar_content_inset_with_nav"
+        android:layout_marginTop="397.5dp"
+        android:layout_marginBottom="125.5dp"
+        android:id="@+id/outcoming"
+        android:editable="false"
+        android:layout_marginLeft="193.5dp" />
+
+</RelativeLayout>

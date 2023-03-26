@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+	<string-array name="serv_ips">
+		<item>192.168.100.9</item>
+		<item>new ip address</item>
+	</string-array>
+</resources>

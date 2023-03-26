@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -12,46 +13,27 @@
         android:id="@+id/button1"
         android:clickable="true"/>
 
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="145.0dp"
+        android:layout_marginLeft="145.0dp"
+        android:layout_marginTop="83.0dp"
+        android:prompt="@string/choose_ip"
+        android:id="@+id/ip"/>
+
     <EditText
-        android:inputType="text"
+        android:inputType="textMultiLine"
         android:layout_width="@dimen/abc_action_bar_stacked_tab_max_width"
         android:layout_height="@dimen/abc_action_bar_content_inset_with_nav"
-        android:layout_marginRight="229.0dp"
+        android:layout_marginRight="280.5dp"
         android:layout_marginTop="163.0dp"
-        android:layout_marginLeft="98.5dp"
+        android:layout_marginLeft="95.5dp"
         android:layout_marginBottom="428.5dp"
         android:id="@+id/textView1"
         android:tooltipText="@string/tool"
+        android:visibility="gone"
         />
-
-    <EditText
-        android:inputType="text"
-        android:layout_width="@dimen/abc_action_bar_stacked_tab_max_width"
-        android:layout_height="@dimen/abc_action_bar_content_inset_with_nav"
-        android:layout_marginRight="98.5dp"
-        android:layout_marginTop="163.0dp"
-        android:layout_marginLeft="229.0dp"
-        android:layout_marginBottom="428.5dp"
-        android:id="@+id/textView2"
-        android:tooltipText="@string/tool2"
-        />
-
-      <EditText
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/abc_action_bar_content_inset_with_nav"
-        android:layout_marginTop="457.5dp"
-        android:visibility="invisible"
-        android:id="@+id/message"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/abc_action_bar_content_inset_with_nav"
-        android:layout_marginTop="400.5dp"
-        android:id="@+id/successOrNot"
-        android:layout_marginBottom="105.5dp"
-        android:visibility="invisible"
-        android:editable="false"/>
 
     <TextView
         android:layout_width="@dimen/abc_action_bar_stacked_tab_max_width"
@@ -60,4 +42,5 @@
         android:layout_marginLeft="98.5dp"
         android:id="@+id/listView1"
         android:editable="false"/>
+
 </RelativeLayout>
