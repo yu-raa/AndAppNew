@@ -66,8 +66,8 @@ namespace AndApp
             while (infos.Contains(246) && infos.Contains(247))
             {
                 if (infos.IndexOf(247, 1) - infos.IndexOf(246) > 1 || infos.IndexOf(246) < infos.IndexOf(247))
-                messages.Add(new KeyValuePair<byte[], byte[]>(infos.ToArray()[1..infos.IndexOf(246)], infos.ToArray()[(infos.IndexOf(246)+1)..((infos.IndexOf(247, 1) > 0)? infos.IndexOf(247, 1) : ^0)]));
-                infos = infos.ToArray()[((infos.IndexOf(247, 1) > 0) ? infos.IndexOf(247, 1) : ^0)..].ToList();
+                messages.Add(new KeyValuePair<byte[], byte[]>(infos.ToArray()[1..infos.IndexOf(246)], infos.ToArray()[(infos.IndexOf(246)+1)..((infos.IndexOf(247, 1) >= 0)? infos.IndexOf(247, 1) : ^0)]));
+                infos = infos.ToArray()[((infos.IndexOf(247, 1) >= 0) ? infos.IndexOf(247, 1) : ^0)..].ToList();
             }
 
             if (infos.Count > 0 && infos.IndexOf(246) != infos.LastIndexOf(246))
@@ -85,7 +85,6 @@ namespace AndApp
             SetContentView(Resource.Layout.mainmenu);
             editTextForPhone = FindViewById<EditText>(Resource.Id.ownPhone);
             textView = FindViewById<TextView>(Resource.Id.sug);
-
         }
 
         protected override void OnResume()
@@ -140,7 +139,7 @@ namespace AndApp
             switch (requestCode)
                 {
                     case 10:
-                        if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                        if (grantResults.Length >= 0 && grantResults[0] == Permission.Granted)
                         {
                         Task t;
                             while (!(t = ConnectAndSend()).IsCompleted || (contact is null || contact.Next != null))
@@ -212,8 +211,7 @@ namespace AndApp
                 contactButton.Invalidate();
 
             Thread2 thread2 = new Thread2();
-            System.Threading.Thread secondthread = new System.Threading.Thread(new ThreadStart(thread2.Run));
-            secondthread.Start();
+           thread2.Run();
 
             contactButton.Click += delegate
             {
@@ -233,6 +231,9 @@ namespace AndApp
             int i = 0;
             for (int j = 0; j < messages.Where(phoneAndMessage => Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneAndMessage.Key), Trimmer.TrimBytes(phoneContact))).Count(); j++)
             {
+                if (Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneContact), Encoding.UTF8.GetBytes(ownPhone)))
+                    Array.Copy(new byte[1] { 244 }, 0, messagesForThis, i, 1);
+                else
                 Array.Copy(new byte[1] { 245 }, 0, messagesForThis, i, 1);
                 Array.Copy(messages.Where(phoneAndMessage => Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneAndMessage.Key), Trimmer.TrimBytes(phoneContact))).ToList().ElementAt(j).Value, 0, messagesForThis, i + 1, messages.Where(phoneAndMessage => Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneAndMessage.Key), Trimmer.TrimBytes(phoneContact))).ToList().ElementAt(j).Value.Length);
                 i += messages.Where(phoneAndMessage => Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneAndMessage.Key), Trimmer.TrimBytes(phoneContact))).ToList().ElementAt(j).Value.Length + 2;

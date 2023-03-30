@@ -11,14 +11,17 @@
         android:layout_marginTop="457.5dp"
         android:id="@+id/message"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="420.5dp"
-        android:id="@+id/successOrNot"
-        android:layout_marginBottom="105.5dp"
-        android:visibility="invisible"
-        android:editable="false"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="475.5dp"
+        android:id="@+id/scrollChat">
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/stackingViewChat"
+            android:orientation="vertical">
+        </GridLayout>
+    </ScrollView>
 
     <TextView
         android:layout_width="match_parent"

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using static Android.Icu.Text.IDNA;
 using System.Linq;
 using static Android.Provider.Telephony.Mms;
+using System.IO;
 
 namespace AndApp
 {
@@ -20,7 +21,7 @@ namespace AndApp
         public TextView listView { get; private set; }
         public EditText textView { get; private set; }
         public static byte[] contact = new byte[0];
-        public List<byte[]> messagesDivided { get; private set; }
+        public Dictionary<byte[], bool> messagesDivided { get; private set; }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -28,7 +29,7 @@ namespace AndApp
 
             SetContentView(Resource.Layout.chat);
 
-            messagesDivided = new List<byte[]>();
+            messagesDivided = new Dictionary<byte[], bool>();
 
             if (Intent.GetByteArrayExtra("contact") != null) {
                 contact = Intent.GetByteArrayExtra("contact");
@@ -38,21 +39,50 @@ namespace AndApp
             
             List<byte> messagess = messages.ToList();
 
-            while (messagess.Contains(245) && messagess.IndexOf(245) != messagess.LastIndexOf(245))
+            while (messagess.Contains(245) || messagess.Contains(244))
             {
-                if (messagess.IndexOf(245, 1) - messagess.IndexOf(245) > 1 || messagess.IndexOf(245) == messagess.LastIndexOf(245))
-                    messagesDivided.Add(messagess.ToArray()[(messagess.IndexOf(245)+1)..((messagess.IndexOf(245, 1) > 0) ? messagess.IndexOf(245, 1) : ^0)]);
-                messagess = messagess.ToArray()[messagess.IndexOf(245, 1)..].ToList();
+                if (messagess.Contains(245) && messagess.First() == 245)
+                    messagesDivided.Add(messagess.ToArray()[(messagess.IndexOf(245)+1)..((messagess.IndexOf(245, 1) > messagess.IndexOf(244)) ? (messagess.IndexOf(244) > 0? messagess.IndexOf(244) : messagess.IndexOf(245, 1)) : (messagess.IndexOf(245, 1) > 0 ? messagess.IndexOf(245, 1) : (messagess.IndexOf(244) > 0? messagess.IndexOf(244) : ^0)))], false);
+                else if (messagess.Contains(244) && messagess.First() == 244)
+                    messagesDivided.Add(messagess.ToArray()[(messagess.IndexOf(244) + 1)..((messagess.IndexOf(244, 1) > messagess.IndexOf(245)) ? (messagess.IndexOf(245) > 0 ? messagess.IndexOf(245) : messagess.IndexOf(244, 1)) : (messagess.IndexOf(244, 1) > 0 ? messagess.IndexOf(244, 1) : (messagess.IndexOf(245) > 0 ? messagess.IndexOf(245) : ^0)))], true);
+
+                messagess = messagess.ToArray()[(messagess.IndexOf(245) > messagess.IndexOf(244)? (messagess.IndexOf(245) > 0 ? messagess.IndexOf(245) : ^0) : (messagess.IndexOf(244) > 0 ? messagess.IndexOf(244) : (messagess.IndexOf(244, 1) > 0? messagess.IndexOf(244, 1) : (messagess.IndexOf(245, 1) > 0 ? messagess.IndexOf(245, 1) : ^0))))..].ToList();
             }
 
-            if (messagess.Count > 0) 
-            messagesDivided.Add(messagess.ToArray()[1..]);
+            if (messagess.Count > 0)
+            {
+                if (messagess.IndexOf(244) == 0)
+                {
+                    while (messagess.Count > 0)
+                    {
+                        messagesDivided.Add(messagess.ToArray()[(messagess.IndexOf(244) + 1)..(messagess.IndexOf(244,1) > 0? messagess.IndexOf(244, 1) : ^0)], true);
+                        messagess = messagess.ToArray()[(messagess.IndexOf(244, 1) > 0 ? messagess.IndexOf(244, 1) : ^0)..].ToList();
+                    }
+                }
+                else
+                {
+                    while (messagess.Count > 0)
+                    {
+                        messagesDivided.Add(messagess.ToArray()[(messagess.IndexOf(245) + 1)..(messagess.IndexOf(245, 1) > 0 ? messagess.IndexOf(245, 1) : ^0)], false);
+                        messagess = messagess.ToArray()[(messagess.IndexOf(245, 1) > 0 ? messagess.IndexOf(245, 1) : ^0)..].ToList();
+                    }
+                }
+            }
 
-            listView = this.FindViewById<TextView>(Resource.Id.successOrNot);
-            listView.Visibility = ViewStates.Visible;
             foreach (var message in messagesDivided)
             {
-                listView.Text += Thread2.Button2_Click(message) + "\n";
+                TextView textView = new TextView(this);
+                GridLayout layout = this.FindViewById<GridLayout>(Resource.Id.stackingViewChat);
+                var par = new GridLayout.LayoutParams();
+                par.Width = 375;
+                par.LeftMargin = 2;
+                textView.TextAlignment = (message.Value.CompareTo(false) == 0) ? TextAlignment.ViewStart : TextAlignment.ViewEnd;
+
+                textView.LayoutParameters = par;
+                textView.Visibility = ViewStates.Visible;
+                layout.AddView(textView);
+                textView.Invalidate();
+                textView.Text = Thread2.Button2_Click(message.Key) + "\n";
             }
 
             textView = this.FindViewById<EditText>(Resource.Id.message);
@@ -104,13 +134,28 @@ namespace AndApp
 
                             }
                             textView.Text = string.Empty;
+
+                        FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
+
+                        sourceStream.Position = sourceStream.Length;
+
+                        if (data1[42..].Length != 0)
+                        {
+                            sourceStream.Write(new byte[1] { 247 });
+                            sourceStream.Write(data1[..21]);
+                            sourceStream.Write(new byte[1] { 246 });
+                            sourceStream.Write(Trimmer.TrimBytes(data1[42..]));
+                            sourceStream.Flush();
                         }
+
+                        sourceStream.Close();
+                    }
                         catch (Exception exc)
                         {
                             listView.Text = exc.Message;
                             listView.Visibility = ViewStates.Visible;
                         }
-                    }
+                }
                 }
                 else
                 {

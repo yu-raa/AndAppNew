@@ -61,18 +61,17 @@ namespace AndApp
                         byte[] data2 = new byte[10000];
                         try
                         {
-                            g = MainMenuActivity.client.Receive(data2, SocketFlags.None);
+                            g = await MainMenuActivity.client.ReceiveAsync(data2, SocketFlags.None);
 
-                            if (g > 0 && Trimmer.TrimBytes(data2).Length > 0)
+                            if (g >= 0 && Trimmer.TrimBytes(data2).Length >= 0)
                             {
                                 data = Trimmer.TrimBytes(data2);
 
                                 FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
 
-                                sourceStream.Position = sourceStream.Length;
-
-                                if (data[42..].Length != 0)
+                                if (data.Length > 42)
                                 {
+                                    sourceStream.Position = sourceStream.Length;
                                     sourceStream.Write(new byte[1] { 247 });
                                     sourceStream.Write(data[21..41]);
                                     sourceStream.Write(new byte[1] { 246 });
@@ -81,9 +80,6 @@ namespace AndApp
                                 }
 
                                 sourceStream.Close();
-
-                                MainMenuActivity.GetInfoFromMessageFile();
-                                MainMenuActivity.messagesForThis = MainMenuActivity.DivideMessages(data[..21]);
                             }
 
                         }
@@ -92,16 +88,15 @@ namespace AndApp
                                 MainMenuActivity.client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                             MainMenuActivity.client.Connect(MainMenuActivity.iPEndPoint);
                                g = MainMenuActivity.client.Receive(data2);
-                            if (g > 0 && Trimmer.TrimBytes(data2).Length > 0)
+                            if (g >= 0 && Trimmer.TrimBytes(data2).Length >= 0)
                             {
                                 data = Trimmer.TrimBytes(data2);
 
                                 FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
 
-                                sourceStream.Position = sourceStream.Length;
-
-                                if (data[42..].Length != 0)
+                                if (data.Length > 42)
                                 {
+                                    sourceStream.Position = sourceStream.Length;
                                     sourceStream.Write(new byte[1] { 247 });
                                     sourceStream.Write(data[21..41]);
                                     sourceStream.Write(new byte[1] { 246 });
@@ -110,9 +105,6 @@ namespace AndApp
                                 }
 
                                 sourceStream.Close();
-
-                                MainMenuActivity.GetInfoFromMessageFile();
-                                MainMenuActivity.messagesForThis = MainMenuActivity.DivideMessages(data[..21]);
 
                             }
                         }
@@ -121,16 +113,15 @@ namespace AndApp
                             MainMenuActivity.client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                             MainMenuActivity.client.Connect(MainMenuActivity.iPEndPoint);
                             g = MainMenuActivity.client.Receive(data2);
-                            if (g > 0 && Trimmer.TrimBytes(data2).Length > 0)
+                            if (g >= 0 && Trimmer.TrimBytes(data2).Length >= 0)
                             {
                                 data = Trimmer.TrimBytes(data2);
 
                                 FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
 
-                                sourceStream.Position = sourceStream.Length;
-
-                                if (data[42..].Length != 0)
+                                if (data.Length > 42)
                                 {
+                                    sourceStream.Position = sourceStream.Length;
                                     sourceStream.Write(new byte[1] { 247 });
                                     sourceStream.Write(data[21..41]);
                                     sourceStream.Write(new byte[1] { 246 });
@@ -139,9 +130,6 @@ namespace AndApp
                                 }
 
                                 sourceStream.Close();
-
-                                MainMenuActivity.GetInfoFromMessageFile();
-                                MainMenuActivity.messagesForThis = MainMenuActivity.DivideMessages(data[..21]);
                             }
                         }
                     }
@@ -193,7 +181,7 @@ namespace AndApp
                 int hours = Math.Abs(i + 1) / 60;
                 int minutes = Math.Abs(i + 1) % 60;
 
-                message += $"> was sent {hours} hour{((hours.ToString().EndsWith('1') && !hours.ToString().EndsWith("11"))? "" : "s")} {minutes} minute{((minutes.ToString().EndsWith('1') && !minutes.ToString().EndsWith("11")) ? "" : "s")} ago";
+                message += $"> was sent {hours} hour{((hours.ToString().EndsWith('1') && !hours.ToString().EndsWith("11"))? "" : "s")} {minutes} minute{((minutes.ToString().EndsWith('1') && (minutes.ToString().Length < 2 || !minutes.ToString().EndsWith("11"))) ? "" : "s")} ago";
 
                 return message;
             }
