@@ -63,15 +63,15 @@ namespace AndApp
 
             List<byte> infos = Trimmer.TrimBytes(info).ToList();
 
-            while (infos.Contains(246) && infos.Contains(247) && infos.IndexOf(246) != infos.LastIndexOf(246))
+            while (infos.Contains(246) && infos.Contains(247))
             {
                 if (infos.IndexOf(247, 1) - infos.IndexOf(246) > 1 || infos.IndexOf(246) < infos.IndexOf(247))
-                messages.Add(new KeyValuePair<byte[], byte[]>(infos.ToArray()[..infos.IndexOf(246)], infos.ToArray()[(infos.IndexOf(246)+1)..((infos.IndexOf(247, 1) > 0)? infos.IndexOf(247, 1) : ^0)]));
+                messages.Add(new KeyValuePair<byte[], byte[]>(infos.ToArray()[1..infos.IndexOf(246)], infos.ToArray()[(infos.IndexOf(246)+1)..((infos.IndexOf(247, 1) > 0)? infos.IndexOf(247, 1) : ^0)]));
                 infos = infos.ToArray()[((infos.IndexOf(247, 1) > 0) ? infos.IndexOf(247, 1) : ^0)..].ToList();
             }
 
-            if (infos.Count > 0)
-                messages.Add(new KeyValuePair<byte[], byte[]>(infos.ToArray()[1..21], infos.ToArray()[22..]));
+            if (infos.Count > 0 && infos.IndexOf(246) != infos.LastIndexOf(246))
+                messages.Add(new KeyValuePair<byte[], byte[]>(infos.ToArray()[1..21], infos.ToArray()[21..]));
         }
 
         public override void OnBackPressed()

@@ -61,7 +61,7 @@ namespace AndApp
                         byte[] data2 = new byte[10000];
                         try
                         {
-                            g = await MainMenuActivity.client.ReceiveAsync(data2, SocketFlags.None);
+                            g = MainMenuActivity.client.Receive(data2, SocketFlags.None);
 
                             if (g > 0 && Trimmer.TrimBytes(data2).Length > 0)
                             {
@@ -69,11 +69,16 @@ namespace AndApp
 
                                 FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
 
-                                sourceStream.Write(new byte[1] { 247 });
-                                sourceStream.Write(data[21..41]);
-                                sourceStream.Write(new byte[1] { 246 });
-                                sourceStream.Write(data[42..]);
-                                sourceStream.Flush();
+                                sourceStream.Position = sourceStream.Length;
+
+                                if (data[42..].Length != 0)
+                                {
+                                    sourceStream.Write(new byte[1] { 247 });
+                                    sourceStream.Write(data[21..41]);
+                                    sourceStream.Write(new byte[1] { 246 });
+                                    sourceStream.Write(data[42..]);
+                                    sourceStream.Flush();
+                                }
 
                                 sourceStream.Close();
 
@@ -92,12 +97,17 @@ namespace AndApp
                                 data = Trimmer.TrimBytes(data2);
 
                                 FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
-                                
-                                sourceStream.Write(new byte[1] { 247 });
-                                sourceStream.Write(data[21..41]);
-                                sourceStream.Write(new byte[1] { 246 });
-                                sourceStream.Write(data[42..]);
-                                sourceStream.Flush();
+
+                                sourceStream.Position = sourceStream.Length;
+
+                                if (data[42..].Length != 0)
+                                {
+                                    sourceStream.Write(new byte[1] { 247 });
+                                    sourceStream.Write(data[21..41]);
+                                    sourceStream.Write(new byte[1] { 246 });
+                                    sourceStream.Write(data[42..]);
+                                    sourceStream.Flush();
+                                }
 
                                 sourceStream.Close();
 
@@ -117,11 +127,16 @@ namespace AndApp
 
                                 FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
 
-                                sourceStream.Write(new byte[1] { 247 });
-                                sourceStream.Write(data[21..41]);
-                                sourceStream.Write(new byte[1] { 246 });
-                                sourceStream.Write(data[42..]);
-                                sourceStream.Flush();
+                                sourceStream.Position = sourceStream.Length;
+
+                                if (data[42..].Length != 0)
+                                {
+                                    sourceStream.Write(new byte[1] { 247 });
+                                    sourceStream.Write(data[21..41]);
+                                    sourceStream.Write(new byte[1] { 246 });
+                                    sourceStream.Write(data[42..]);
+                                    sourceStream.Flush();
+                                }
 
                                 sourceStream.Close();
 
@@ -140,7 +155,7 @@ namespace AndApp
 
         public static string Button2_Click(byte[] data)
         {
-            if (Trimmer.TrimBytes(data).Length > 16 && Trimmer.TrimBytes(data).Length % 8 == 0 && data.ToList().First() != 255)
+            if (Trimmer.TrimBytes(data).Length > 16 && Trimmer.TrimBytes(data).Length % 8 == 0)
             {
                 string message = string.Empty;
                 string messageWithMarker = " ";
@@ -163,7 +178,7 @@ namespace AndApp
 
                     try
                     {
-                        messageWithMarker = Encryption.Decrypt(data[..^16], iv, key);
+                        messageWithMarker = Encryption.Decrypt(Trimmer.TrimBytes(data)[..^16], iv, key);
                     }
                     catch (CryptographicException)
                     {
@@ -183,7 +198,7 @@ namespace AndApp
                 return message;
             }
 
-            return string.Empty;
+            return "user is typing...";
         }
     }
 
