@@ -74,8 +74,8 @@ namespace AndApp
                 TextView textView = new TextView(this);
                 GridLayout layout = this.FindViewById<GridLayout>(Resource.Id.stackingViewChat);
                 var par = new GridLayout.LayoutParams();
-                par.Width = 375;
-                par.LeftMargin = 2;
+                par.Width = 1000;
+                par.LeftMargin = 10;
                 textView.TextAlignment = (message.Value.CompareTo(false) == 0) ? TextAlignment.ViewStart : TextAlignment.ViewEnd;
 
                 textView.LayoutParameters = par;
