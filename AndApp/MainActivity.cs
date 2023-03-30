@@ -16,6 +16,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Xamarin.Essentials;
 using System.Text;
+using AndroidX.Core.App;
+using Android;
+using System.Threading.Tasks;
+using Android.Content.PM;
+using static Android.Provider.DocumentsContract;
+using static Android.Icu.Text.IDNA;
 
 namespace AndApp
 {
@@ -41,14 +47,11 @@ namespace AndApp
 
     class Thread2
     {
-        byte[] data2;
-        int g;
-        public static string messager { get; private set; }
+        static byte[] data;
+        static int g;
 
-        public  void Run()
+        public async void Run()
         {
-            messager = string.Empty;
-
             while (MainMenuActivity.client != null)
             {
                 try
@@ -58,13 +61,24 @@ namespace AndApp
                         byte[] data2 = new byte[10000];
                         try
                         {
-                            g = MainMenuActivity.client.Receive(data2);
+                            g = await MainMenuActivity.client.ReceiveAsync(data2, SocketFlags.None);
 
                             if (g > 0 && Trimmer.TrimBytes(data2).Length > 0)
                             {
-                                this.data2 = Trimmer.TrimBytes(data2);
+                                data = Trimmer.TrimBytes(data2);
 
-                                messager = Button2_Click();
+                                FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
+
+                                sourceStream.Write(new byte[1] { 247 });
+                                sourceStream.Write(data[21..41]);
+                                sourceStream.Write(new byte[1] { 246 });
+                                sourceStream.Write(data[42..]);
+                                sourceStream.Flush();
+
+                                sourceStream.Close();
+
+                                MainMenuActivity.GetInfoFromMessageFile();
+                                MainMenuActivity.messagesForThis = MainMenuActivity.DivideMessages(data[..21]);
                             }
 
                         }
@@ -75,9 +89,21 @@ namespace AndApp
                                g = MainMenuActivity.client.Receive(data2);
                             if (g > 0 && Trimmer.TrimBytes(data2).Length > 0)
                             {
-                                this.data2 = Trimmer.TrimBytes(data2);
+                                data = Trimmer.TrimBytes(data2);
 
-                                messager = Button2_Click();
+                                FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
+                                
+                                sourceStream.Write(new byte[1] { 247 });
+                                sourceStream.Write(data[21..41]);
+                                sourceStream.Write(new byte[1] { 246 });
+                                sourceStream.Write(data[42..]);
+                                sourceStream.Flush();
+
+                                sourceStream.Close();
+
+                                MainMenuActivity.GetInfoFromMessageFile();
+                                MainMenuActivity.messagesForThis = MainMenuActivity.DivideMessages(data[..21]);
+
                             }
                         }
                         catch (ObjectDisposedException)
@@ -87,9 +113,20 @@ namespace AndApp
                             g = MainMenuActivity.client.Receive(data2);
                             if (g > 0 && Trimmer.TrimBytes(data2).Length > 0)
                             {
-                                this.data2 = Trimmer.TrimBytes(data2);
+                                data = Trimmer.TrimBytes(data2);
 
-                                messager = Button2_Click();
+                                FileStream sourceStream = File.Open(MainMenuActivity.path, FileMode.Open, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
+
+                                sourceStream.Write(new byte[1] { 247 });
+                                sourceStream.Write(data[21..41]);
+                                sourceStream.Write(new byte[1] { 246 });
+                                sourceStream.Write(data[42..]);
+                                sourceStream.Flush();
+
+                                sourceStream.Close();
+
+                                MainMenuActivity.GetInfoFromMessageFile();
+                                MainMenuActivity.messagesForThis = MainMenuActivity.DivideMessages(data[..21]);
                             }
                         }
                     }
@@ -101,11 +138,9 @@ namespace AndApp
             }
         }
 
-        public string Button2_Click()
+        public static string Button2_Click(byte[] data)
         {
-            if (Trimmer.TrimBytes(data2).Length > 0 && Trimmer.TrimBytes(data2).Length <= 22)
-                return "[username] is typing...";
-            else if (Trimmer.TrimBytes(data2).Length > 22)
+            if (Trimmer.TrimBytes(data).Length > 16 && Trimmer.TrimBytes(data).Length % 8 == 0 && data.ToList().First() != 255)
             {
                 string message = string.Empty;
                 string messageWithMarker = " ";
@@ -126,7 +161,16 @@ namespace AndApp
                         key[j] = (byte)((j + 10) * 9);
                     }
 
-                    messageWithMarker = Encryption.Decrypt(data2[22..^16], iv, key); 
+                    try
+                    {
+                        messageWithMarker = Encryption.Decrypt(data[..^16], iv, key);
+                    }
+                    catch (CryptographicException)
+                    {
+                        i--;
+                        continue;
+                    }
+                    
                     message = "<" + messageWithMarker[1..^1];
                     i--;
                 }
@@ -245,6 +289,13 @@ namespace AndApp
             textVieww1 = FindViewById<EditText>(Resource.Id.textView1);
         }
 
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
         private void Spinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
             Spinner spinner = (Spinner)sender;
@@ -261,12 +312,6 @@ namespace AndApp
             }
 
             button.LongClick += Button_Click;
-        }
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
-        {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 }

@@ -19,16 +19,19 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Android.Net;
 using System.Net.NetworkInformation;
+using System.IO;
+using Java.Lang;
 
 namespace AndApp
 {
     [Activity(Label = "Main Menu")]
     public class MainMenuActivity : AppCompatActivity
     {
+        public static string path = Android.App.Application.Context.GetExternalFilesDir("").AbsolutePath + $"/m.txt";
         public static Socket client;
         private EditText editTextForPhone;
         private TextView textView;
-        private string str;
+        public static string ownPhone { get; private set; }
         private bool isFirst = true, isFirst2 = true;
         private LinkedList<Contact> contactss;
         private IEnumerable<Contact> contacts;
@@ -36,6 +39,40 @@ namespace AndApp
         private LinkedListNode<Contact> contact;
         public static byte[] phoneContact { get; private set; }
         public static IPEndPoint iPEndPoint { get; private set; }
+        public static List<KeyValuePair<byte[], byte[]>> messages { get; private set; }
+        private static List<byte[]> bytes = new List<byte[]>();
+        private static byte[] info;
+        public static byte[] messagesForThis { get; set; }
+
+        public static void GetInfoFromMessageFile()
+        {
+            messages = new List<KeyValuePair<byte[], byte[]>>();
+            FileStream sourceStream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Read | FileAccess.Write, FileShare.ReadWrite);
+            sourceStream.Position = 0;
+            info = new byte[1000];
+            sourceStream.Read(info, 0, info.Length);
+            while (sourceStream.Position < sourceStream.Length)
+            {
+                byte[] temp = info;
+                Array.Resize(ref info, info.Length + 100);
+                Array.Copy(temp, info, temp.Length);
+                sourceStream.Read(info, temp.Length, 100);
+            }
+            sourceStream.Flush();
+            sourceStream.Close();
+
+            List<byte> infos = Trimmer.TrimBytes(info).ToList();
+
+            while (infos.Contains(246) && infos.Contains(247) && infos.IndexOf(246) != infos.LastIndexOf(246))
+            {
+                if (infos.IndexOf(247, 1) - infos.IndexOf(246) > 1 || infos.IndexOf(246) < infos.IndexOf(247))
+                messages.Add(new KeyValuePair<byte[], byte[]>(infos.ToArray()[..infos.IndexOf(246)], infos.ToArray()[(infos.IndexOf(246)+1)..((infos.IndexOf(247, 1) > 0)? infos.IndexOf(247, 1) : ^0)]));
+                infos = infos.ToArray()[((infos.IndexOf(247, 1) > 0) ? infos.IndexOf(247, 1) : ^0)..].ToList();
+            }
+
+            if (infos.Count > 0)
+                messages.Add(new KeyValuePair<byte[], byte[]>(infos.ToArray()[1..21], infos.ToArray()[22..]));
+        }
 
         public override void OnBackPressed()
         {
@@ -54,6 +91,7 @@ namespace AndApp
         protected override void OnResume()
         {
             base.OnResume();
+
             if (client is null || !client.Connected)
             {
                 string ipAddress = string.Empty;
@@ -85,7 +123,7 @@ namespace AndApp
                     {
                         if (editTextForPhone.Text.Count() == 13)
                         {
-                            str = editTextForPhone.Text.ToString();
+                            ownPhone = editTextForPhone.Text.ToString();
                             ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.ReadContacts }, 10);
                         }
                     };
@@ -123,7 +161,7 @@ namespace AndApp
             {
                 dataList.Add(221);
 
-                byte[] re = Encoding.UTF8.GetBytes(str);
+                byte[] re = Encoding.UTF8.GetBytes(ownPhone);
 
                 client.Send(re, SocketFlags.None);
             }
@@ -174,7 +212,7 @@ namespace AndApp
                 contactButton.Invalidate();
 
             Thread2 thread2 = new Thread2();
-            Thread secondthread = new Thread(new ThreadStart(thread2.Run));
+            System.Threading.Thread secondthread = new System.Threading.Thread(new ThreadStart(thread2.Run));
             secondthread.Start();
 
             contactButton.Click += delegate
@@ -182,9 +220,25 @@ namespace AndApp
                 phoneContact = Encoding.UTF8.GetBytes(contact.Phones[0].PhoneNumber);
                 Intent newIntent = new Intent(this, typeof(ChatActivity));
                 newIntent.PutExtra("contact", phoneContact);
-                newIntent.PutExtra("message", "");
+                GetInfoFromMessageFile();
+                messagesForThis = DivideMessages(phoneContact);
+                newIntent.PutExtra("messages", messagesForThis);
                 StartActivity(newIntent);
             };
+        }
+
+        public static byte[] DivideMessages(byte[] phoneContact)
+        {
+            byte[] messagesForThis = new byte[10000];
+            int i = 0;
+            for (int j = 0; j < messages.Where(phoneAndMessage => Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneAndMessage.Key), Trimmer.TrimBytes(phoneContact))).Count(); j++)
+            {
+                Array.Copy(new byte[1] { 245 }, 0, messagesForThis, i, 1);
+                Array.Copy(messages.Where(phoneAndMessage => Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneAndMessage.Key), Trimmer.TrimBytes(phoneContact))).ToList().ElementAt(j).Value, 0, messagesForThis, i + 1, messages.Where(phoneAndMessage => Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneAndMessage.Key), Trimmer.TrimBytes(phoneContact))).ToList().ElementAt(j).Value.Length);
+                i += messages.Where(phoneAndMessage => Comparator.CompareByteArrays(Trimmer.TrimBytes(phoneAndMessage.Key), Trimmer.TrimBytes(phoneContact))).ToList().ElementAt(j).Value.Length + 2;
+            }
+
+            return messagesForThis;
         }
     }
 }
