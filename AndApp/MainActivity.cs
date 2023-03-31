@@ -50,7 +50,7 @@ namespace AndApp
         static byte[] data;
         static int g;
 
-        public async void Run()
+        public async Task Run()
         {
             while (MainMenuActivity.client != null)
             {
@@ -61,7 +61,7 @@ namespace AndApp
                         byte[] data2 = new byte[10000];
                         try
                         {
-                            g = await MainMenuActivity.client.ReceiveAsync(data2, SocketFlags.None);
+                            g = await MainMenuActivity.client.ReceiveAsync(data2, SocketFlags.None).ConfigureAwait(false);
 
                             if (g >= 0 && Trimmer.TrimBytes(data2).Length >= 0)
                             {

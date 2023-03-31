@@ -42,11 +42,16 @@ namespace AndApp
             while (messagess.Contains(245) || messagess.Contains(244))
             {
                 if (messagess.Contains(245) && messagess.First() == 245)
-                    messagesDivided.Add(messagess.ToArray()[(messagess.IndexOf(245)+1)..((messagess.IndexOf(245, 1) > messagess.IndexOf(244)) ? (messagess.IndexOf(244) > 0? messagess.IndexOf(244) : messagess.IndexOf(245, 1)) : (messagess.IndexOf(245, 1) > 0 ? messagess.IndexOf(245, 1) : (messagess.IndexOf(244) > 0? messagess.IndexOf(244) : ^0)))], false);
+                    messagesDivided.TryAdd(messagess.ToArray()[(messagess.IndexOf(245)+1)..((messagess.IndexOf(245, 1) > messagess.IndexOf(244)) ? (messagess.IndexOf(244) > 0? messagess.IndexOf(244) : messagess.IndexOf(245, 1)) : (messagess.IndexOf(245, 1) > 0 ? messagess.IndexOf(245, 1) : (messagess.IndexOf(244) > 0? messagess.IndexOf(244) : ^0)))], false);
                 else if (messagess.Contains(244) && messagess.First() == 244)
-                    messagesDivided.Add(messagess.ToArray()[(messagess.IndexOf(244) + 1)..((messagess.IndexOf(244, 1) > messagess.IndexOf(245)) ? (messagess.IndexOf(245) > 0 ? messagess.IndexOf(245) : messagess.IndexOf(244, 1)) : (messagess.IndexOf(244, 1) > 0 ? messagess.IndexOf(244, 1) : (messagess.IndexOf(245) > 0 ? messagess.IndexOf(245) : ^0)))], true);
+                    messagesDivided.TryAdd(messagess.ToArray()[(messagess.IndexOf(244) + 1)..((messagess.IndexOf(244, 1) > messagess.IndexOf(245)) ? (messagess.IndexOf(245) > 0 ? messagess.IndexOf(245) : messagess.IndexOf(244, 1)) : (messagess.IndexOf(244, 1) > 0 ? messagess.IndexOf(244, 1) : (messagess.IndexOf(245) > 0 ? messagess.IndexOf(245) : ^0)))], true);
 
-                messagess = messagess.ToArray()[(messagess.IndexOf(245) > messagess.IndexOf(244)? (messagess.IndexOf(245) > 0 ? messagess.IndexOf(245) : ^0) : (messagess.IndexOf(244) > 0 ? messagess.IndexOf(244) : (messagess.IndexOf(244, 1) > 0? messagess.IndexOf(244, 1) : (messagess.IndexOf(245, 1) > 0 ? messagess.IndexOf(245, 1) : ^0))))..].ToList();
+                if (messagess.Contains(245) && messagess.Contains(244))
+                messagess = messagess.ToArray()[(messagess.IndexOf(245) > messagess.IndexOf(244)? messagess.IndexOf(245) : messagess.IndexOf(244))..].ToList();
+                else if (messagess.Contains(245))
+                    messagess = messagess.ToArray()[(messagess.IndexOf(245, 1) > 0 ? messagess.IndexOf(245, 1) : ^0)..].ToList();
+                else if (messagess.Contains(244))
+                    messagess = messagess.ToArray()[(messagess.IndexOf(244, 1) > 0 ? messagess.IndexOf(244, 1) : ^0)..].ToList();
             }
 
             if (messagess.Count > 0)

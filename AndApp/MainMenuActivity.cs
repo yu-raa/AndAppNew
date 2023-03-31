@@ -211,9 +211,13 @@ namespace AndApp
                 contactButton.Invalidate();
 
             Thread2 thread2 = new Thread2();
-           thread2.Run();
+            thread2.Run();
 
-            contactButton.Click += delegate
+
+
+            contactButton.Click += OnClick;
+           
+                void OnClick(object sender, EventArgs e)
             {
                 phoneContact = Encoding.UTF8.GetBytes(contact.Phones[0].PhoneNumber);
                 Intent newIntent = new Intent(this, typeof(ChatActivity));
@@ -222,7 +226,7 @@ namespace AndApp
                 messagesForThis = DivideMessages(phoneContact);
                 newIntent.PutExtra("messages", messagesForThis);
                 StartActivity(newIntent);
-            };
+            }
         }
 
         public static byte[] DivideMessages(byte[] phoneContact)
